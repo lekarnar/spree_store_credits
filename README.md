@@ -1,6 +1,6 @@
 # Spree Store Credits
 
-[![Build Status](https://travis-ci.org/spree-contrib/spree_store_credits.svg?branch=master)](https://travis-ci.org/spree-contrib/spree_store_credits)
+[![Build Status](https://travis-ci.org/spree-contrib/spree_store_credits.svg?branch=2-4-stable)](https://travis-ci.org/spree-contrib/spree_store_credits)
 [![Code Climate](https://codeclimate.com/github/spree-contrib/spree_store_credits/badges/gpa.svg)](https://codeclimate.com/github/spree-contrib/spree_store_credits)
 
 This Spree extension allows admins to issue arbitrary amounts of store credit to users. Users can redeem store credit during checkout, as part or full payment for an order. Also extends My Account page to display outstanding credit balance, and orders that used store credit.
