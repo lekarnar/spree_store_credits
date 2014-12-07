@@ -4,8 +4,8 @@ Spree::Order.class_eval do
   # the check for user? below is to ensure we don't break the
   # admin app when creating a new order from the admin console
   # In that case, we create an order before assigning a user
-  before_save :process_store_credit, if: "self.user.present? && @store_credit_amount"
-  after_save :ensure_sufficient_credit, if: "self.user.present? && !self.completed?"
+  before_save :process_store_credit, if: :store_credit_processing_required?
+  after_save :ensure_sufficient_credit, if: proc { |order| order.user.present? && !order.completed? }
 
   validates_with StoreCreditMinimumValidator
 
@@ -19,7 +19,7 @@ Spree::Order.class_eval do
   alias_method_chain :process_payments!, :credits
 
   def store_credit_amount
-    adjustments.store_credits.sum(:amount).abs.to_f
+    @store_credit_amount || adjustments.store_credits.sum(:amount).abs.to_f
   end
 
   # in case of paypal payment, item_total cannot be 0
@@ -29,14 +29,14 @@ Spree::Order.class_eval do
 
   # returns the maximum usable amount of store credits
   def store_credit_maximum_usable_amount
-    if user.store_credits_total > 0
-      user.store_credits_total > store_credit_maximum_amount ? store_credit_maximum_amount : user.store_credits_total
-    else
-      0
-    end
+    [store_credit_maximum_amount, [user.store_credits_total, 0].max].min
   end
 
   private
+
+  def store_credit_processing_required?
+    user.present? && (@store_credit_amount || @remove_store_credits)
+  end
 
   # credit or update store credit adjustment to correct value if amount specified
   def process_store_credit
@@ -45,7 +45,7 @@ Spree::Order.class_eval do
     # store credit can't be greater than order total (not including existing credit), or the user's available credit
     @store_credit_amount = [@store_credit_amount, user.store_credits_total, (total + store_credit_amount.abs)].min
 
-    if @store_credit_amount <= 0
+    if @store_credit_amount <= 0 || @remove_store_credits
       adjustments.store_credits.destroy_all
     else
       sca = adjustments.store_credits.first
