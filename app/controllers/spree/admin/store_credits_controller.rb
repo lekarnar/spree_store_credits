@@ -10,6 +10,9 @@ module Spree
     end
 
     private
+    def location_after_save
+      admin_user_store_credits_url(@store_credit.user)
+    end
 
     def check_amounts
       return unless @store_credit.remaining_amount < @store_credit.amount
