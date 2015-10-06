@@ -2,8 +2,9 @@ Deface::Override.new(
   virtual_path: 'spree/admin/shared/sub_menu/_configuration',
   name: 'store_credits_admin_configurations_menu',
   insert_bottom: '[data-hook="admin_configurations_sidebar_menu"]',
-  text: '<%= configurations_sidebar_menu_item Spree.t(:store_credits), admin_store_credits_url %>',
-  disabled: false)
+  # text: '<%= configurations_sidebar_menu_item Spree.t(:store_credits), admin_store_credits_url %>'
+  text: 'STOCAZZO'
+)
 
 Deface::Override.new(
   virtual_path: 'spree/admin/users/index',
@@ -26,9 +27,17 @@ Deface::Override.new(
   partial: 'spree/users/store_credits',
   disabled: false)
 
+
+Deface::Override.new(
+  virtual_path: 'spree/admin/users/_sidebar',
+  name: 'store_credits_admin_users',
+  insert_bottom: '[data-hook="admin_user_tab_options"]',
+  text: "<li<%== \" class='active'\" if current == :items %>><%= link_to_with_icon('usd', Spree.t(:store_credits), admin_user_store_credits_path(@user)) %></li>"
+)
+
 Deface::Override.new(
   virtual_path: 'spree/admin/general_settings/edit',
   name: 'admin_general_settings_edit_for_sc',
   insert_before: '[data-hook="buttons"]',
   partial: 'spree/admin/store_credits/limit',
-  disabled: true)
+  disabled: false)
