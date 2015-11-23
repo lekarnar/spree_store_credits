@@ -57,6 +57,7 @@ Spree::Order.class_eval do
           label: Spree.t(:store_credit),
           amount: -(@store_credit_amount),
           source_type: 'Spree::StoreCredit',
+          order: self,
           adjustable: self
         )
       end
