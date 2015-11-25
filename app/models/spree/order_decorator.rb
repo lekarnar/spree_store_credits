@@ -76,7 +76,7 @@ Spree::Order.class_eval do
 
     user.store_credits.each do |store_credit|
       break if credit_used == 0
-      break unless store_credit.remaining_amount > 0
+      next unless store_credit.remaining_amount > 0
       if store_credit.remaining_amount > credit_used
         store_credit.remaining_amount -= credit_used
         store_credit.save
