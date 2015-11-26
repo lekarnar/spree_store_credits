@@ -9,12 +9,12 @@ Deface::Override.new(
 Deface::Override.new(
   virtual_path: 'spree/admin/shared/_main_menu',
   name: 'Add store credits to admin menu',
-  insert_after: %{erb[silent]:contains("if can? :admin, current_store")},
-  text: '<% if Spree.user_class && can?(:admin, Spree.user_class) %>
+  insert_after: %{erb[silent]:contains("if Spree.user_class && can?(:admin, Spree.user_class)")},
+  text: '<% if can?(:manage, Spree::StoreCredit) %>
                            <ul class="nav nav-sidebar">
-                            <%= tab Spree.t(:store_credits), icon: "gift", url: admin_store_credits_path %>
-                          </ul>
-                          <% end %>',
+                             <%= tab Spree.t(:store_credits), icon: "gift", url: admin_store_credits_path %>
+                             </ul>
+                           <% end %>',
   disabled: false
 )
 
