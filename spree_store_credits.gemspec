@@ -40,4 +40,5 @@ Gem::Specification.new do |s|
   s.add_development_dependency 'guard-rspec', '>= 4.2.8'
   s.add_development_dependency 'rubocop', '>= 0.24.1'
   s.add_development_dependency 'phantomjs'
+  s.add_development_dependency 'capybara-screenshot'
 end

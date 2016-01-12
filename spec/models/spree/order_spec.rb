@@ -17,29 +17,29 @@ describe Spree::Order do
     it 'creates store credit adjustment when user has sufficient credit' do
       order.store_credit_amount = 5.0
       order.save
-      expect(order.adjustments.store_credits.size).to be(1)
-      expect(order.store_credit_amount).to be(5.0)
+      expect(order.adjustments.store_credits.size).to eq(1)
+      expect(order.store_credit_amount).to eq(5.0)
     end
 
     it 'only create adjustment with amount equal to users total credit' do
       order.store_credit_amount = 50.0
       order.save
-      expect(order.store_credit_amount.to_f).to be(45.00)
+      expect(order.store_credit_amount.to_f).to eq(45.00)
     end
 
     it 'only create adjustment with amount equal to order total' do
       allow(user).to receive_messages(store_credits_total: 100.0)
       order.store_credit_amount = 90.0
       order.save
-      expect(order.store_credit_amount.to_f).to be(50.00)
+      expect(order.store_credit_amount).to eq(50.00)
     end
 
     it 'does not create adjustment when user does not have any credit' do
       allow(user).to receive_messages(store_credits_total: 0.0)
       order.store_credit_amount = 5.0
       order.save
-      expect(order.adjustments.store_credits.count).to be(0)
-      expect(order.store_credit_amount.to_f).to be(0.0)
+      expect(order.adjustments.store_credits.count).to eq(0)
+      expect(order.store_credit_amount.to_f).to eq(0.0)
     end
 
     it 'updates order totals if credit is applied' do
@@ -49,7 +49,7 @@ describe Spree::Order do
     end
 
     it 'updates payment amount if credit is applied' do
-      allow(order).to receive_message_chain(:unprocessed_payments, first: double('payment', payment_method: double('payment method', payment_profiles_supported?: true)))
+      allow(order).to receive_message_chain(:unprocessed_payments, first: double('payment', amount: 5, payment_method: double('payment method', payment_profiles_supported?: true)))
       expect(order.unprocessed_payments.first).to receive(:amount=)
       order.store_credit_amount = 5.0
       order.save
@@ -58,7 +58,7 @@ describe Spree::Order do
     it 'creates negative adjustment' do
       order.store_credit_amount = 5.0
       order.save
-      expect(order.adjustments.first.amount.to_f).to be(-5.0)
+      expect(order.adjustments.first.amount.to_f).to eq(-5.0)
     end
 
     it 'processes credits if order total is already zero' do
@@ -66,49 +66,49 @@ describe Spree::Order do
       order.store_credit_amount = 5.0
       expect(order).to receive(:process_store_credit)
       order.save
-      expect(order.adjustments.store_credits.count).to be(0)
-      expect(order.store_credit_amount.to_f).to be(0.0)
+      expect(order.adjustments.store_credits.count).to eq(0)
+      expect(order.store_credit_amount.to_f).to eq(0.0)
     end
 
     context 'with an existing adjustment' do
-      before { order.adjustments.store_credits.create(label: I18n.t(:store_credit), amount: -10) }
+      before { order.adjustments.store_credits.create(order: order, label: I18n.t(:store_credit), amount: -10) }
 
       it 'decreases existing adjustment if specific amount is less than adjustment amount' do
         order.store_credit_amount = 5.0
-        order.save
-        expect(order.adjustments.store_credits.count).to be(1)
-        expect(order.store_credit_amount.to_f).to be(5.0)
+        order.save!
+        expect(order.adjustments.store_credits.count).to eq(1)
+        expect(order.store_credit_amount.to_f).to eq(5.0)
       end
 
       it 'increases existing adjustment if specified amount is greater than adjustment amount' do
         order.store_credit_amount = 25.0
         order.save
-        expect(order.adjustments.store_credits.count).to be(1)
-        expect(order.store_credit_amount.to_f).to be(25.0)
+        expect(order.adjustments.store_credits.count).to eq(1)
+        expect(order.store_credit_amount.to_f).to eq(25.0)
       end
 
       it 'destroys the adjustment if specified amount is zero' do
         order.store_credit_amount = 0.0
         order.save
-        expect(order.adjustments.store_credits.count).to be(0)
-        expect(order.store_credit_amount.to_f).to be(0.0)
+        expect(order.adjustments.store_credits.count).to eq(0)
+        expect(order.store_credit_amount.to_f).to eq(0.0)
       end
 
       it 'decreases existing adjustment when existing credit amount is equal to the order total' do
         allow(order).to receive_messages(total: 10)
         order.store_credit_amount = 5.0
         order.save
-        expect(order.adjustments.store_credits.count).to be(1)
-        expect(order.store_credit_amount.to_f).to be(5.0)
+        expect(order.adjustments.store_credits.count).to eq(1)
+        expect(order.store_credit_amount.to_f).to eq(5.0)
       end
     end
   end
 
   context '.store_credit_amount' do
     it 'returns total for all store credit adjustments applied to order' do
-      order.adjustments.store_credits.create(label: I18n.t(:store_credit), amount: -10)
-      order.adjustments.store_credits.create(label: I18n.t(:store_credit), amount: -5)
-      expect(order.store_credit_amount.to_f).to be(15.0)
+      order.adjustments.store_credits.create!(order: order,label: I18n.t(:store_credit), amount: -10)
+      order.adjustments.store_credits.create!(order: order, label: I18n.t(:store_credit), amount: -5)
+      expect(order.store_credit_amount.to_f).to eq(15.0)
     end
   end
 
@@ -147,7 +147,7 @@ describe Spree::Order do
       new_order.state = :confirm
       new_order.next!
       expect(new_order.state).to eq('complete')
-      expect(user.store_credits_total.to_f).to be(100.00)
+      expect(user.store_credits_total.to_f).to eq(100.00)
     end
 
     # regression
@@ -164,7 +164,7 @@ describe Spree::Order do
     let!(:payment) { create(:payment, order: order, amount: 40, state: 'completed') }
 
     before do
-      order.adjustments.store_credits.create(label: I18n.t(:store_credit), amount: -10, eligible: true)
+      order.adjustments.store_credits.create(order: order, label: I18n.t(:store_credit), amount: -10, eligible: true)
       order.update!
     end
 
@@ -182,13 +182,13 @@ describe Spree::Order do
       end
 
       it 'destroys all store credit adjustments' do
-        expect(order.adjustment_total.to_f).to be(-10.0)
-        expect(order.total.to_f).to be(100.0)
-        expect(order.payment_total.to_f).to be(40.0)
+        expect(order.adjustment_total.to_f).to eq(-10.0)
+        expect(order.total.to_f).to eq(100.0)
+        expect(order.payment_total.to_f).to eq(40.0)
         order.send(:ensure_sufficient_credit)
-        expect(order.adjustments.store_credits.size).to be(0)
+        expect(order.adjustments.store_credits.size).to eq(0)
         order.reload
-        expect(order.adjustment_total.to_f).to be(0.0)
+        expect(order.adjustment_total.to_f).to eq(0.0)
       end
 
       it "updates the order's payment state" do
@@ -225,15 +225,15 @@ describe Spree::Order do
       end
 
       it 'is invalid' do
-        expect(order.valid?).to be(false)
+        expect(order.valid?).to eq(false)
         expect(order.errors).not_to be_nil
       end
 
       it 'is valid when store_credit_amount is 0' do
         order.instance_variable_set(:@store_credit_amount, 0)
         allow(order).to receive_messages(item_total: 50)
-        expect(order.valid?).to be(true)
-        expect(order.errors.count).to be(0)
+        expect(order.valid?).to eq(true)
+        expect(order.errors.count).to eq(0)
       end
     end
 
@@ -243,8 +243,8 @@ describe Spree::Order do
       end
 
       it 'is valid when item total is greater than limit' do
-        expect(order.valid?).to be(true)
-        expect(order.errors.count).to be(0)
+        expect(order.valid?).to eq(true)
+        expect(order.errors.count).to eq(0)
       end
     end
   end
