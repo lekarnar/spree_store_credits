@@ -64,6 +64,7 @@ RSpec.feature 'Promotion for Store Credits', :js, :inaccessible do
       fill_in 'order_store_credit_amount', with: '19.99'
 
       click_button Spree.t(:save_and_continue)
+      place_order!
 
       # Store credits MAXIMUM => item_total - 0.01 in order to be valid ex : paypal orders
       expect(page).to have_content '-$19.99'

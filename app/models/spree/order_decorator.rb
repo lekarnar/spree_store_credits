@@ -32,6 +32,10 @@ Spree::Order.class_eval do
     [store_credit_maximum_amount, [user.store_credits_total, 0].max].min
   end
 
+  def payment_required?
+    true
+  end
+
   private
 
   def store_credit_processing_required?
@@ -69,6 +73,7 @@ Spree::Order.class_eval do
     unprocessed_payments.first.amount = total
     unprocessed_payments.first.amount
   end
+
 
   def consume_users_credit
     return unless completed? && user.present?

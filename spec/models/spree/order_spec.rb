@@ -142,8 +142,9 @@ describe Spree::Order do
 
     it 'calls consume_users_credit after transition to complete' do
       user = user_with_credits
-      new_order = Spree::Order.new(user: user)
+      new_order = Spree::Order.create(user: user)
       allow(new_order).to receive_messages(store_credit_amount: 55)
+      new_order.payments.create!(order: order, amount: order.total - 55, payment_method: create(:credit_card_payment_method))
       new_order.state = :confirm
       new_order.next!
       expect(new_order.state).to eq('complete')
