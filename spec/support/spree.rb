@@ -6,6 +6,6 @@ require 'spree/testing_support/capybara_ext'
 require 'spree/testing_support/order_walkthrough'
 
 RSpec.configure do |config|
-  config.include Spree::TestingSupport::ControllerRequests
+  config.include Spree::TestingSupport::ControllerRequests, type: :controller
   config.include Spree::TestingSupport::UrlHelpers
 end

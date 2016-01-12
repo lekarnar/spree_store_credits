@@ -1,6 +1,6 @@
-RSpec.describe Spree::Order, type: :model do
+describe Spree::Order do
 
-  let(:user)          { create(:user) }
+  let!(:user)          { create(:user) }
   let!(:store_credit) { create(:store_credit, user: user, amount: 45.00, remaining_amount: 45.00) }
   let(:line_item)     { mock_model(Spree::LineItem, variant: double('variant'), quantity: 5, price: 10) }
   let(:order)         { create(:order, user: user) }
