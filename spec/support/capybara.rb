@@ -1,6 +1,10 @@
 require 'capybara/rspec'
 require 'capybara/rails'
 require 'capybara/poltergeist'
+require 'capybara-screenshot/rspec'
+
+Capybara.save_and_open_page_path = "#{ENV.fetch('CIRCLE_ARTIFACTS', Rails.root.join('tmp/capybara'))}"
+Capybara::Screenshot.prune_strategy = { keep: 20 }
 
 module FeatureHelpers
   def sign_in_as!(user)
@@ -77,8 +81,9 @@ RSpec.configure do |config|
   config.include FeatureHelpers, type: :feature
 
   Capybara.javascript_driver = :poltergeist
+  Phantomjs.path # Force install on require
   Capybara.register_driver :poltergeist do |app|
-    Capybara::Poltergeist::Driver.new app, timeout: 30
+    Capybara::Poltergeist::Driver.new(app, :phantomjs => Phantomjs.path)
   end
 
   Capybara.default_wait_time = 15 # Default is 5.
