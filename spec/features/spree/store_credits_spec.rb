@@ -7,6 +7,7 @@ RSpec.feature 'Promotion for Store Credits', :js, :inaccessible do
   given!(:mug)             { create(:product, name: 'RoR Mug') }
   given!(:payment_method)  { create(:credit_card_payment_method) }
   given!(:zone)            { create(:zone) }
+  given!(:store)           { create(:store) }
 
   context 'when new user' do
     given!(:address)   { create(:address, state: Spree::State.first) }
@@ -63,6 +64,7 @@ RSpec.feature 'Promotion for Store Credits', :js, :inaccessible do
       fill_in 'order_store_credit_amount', with: '19.99'
 
       click_button Spree.t(:save_and_continue)
+      place_order!
 
       # Store credits MAXIMUM => item_total - 0.01 in order to be valid ex : paypal orders
       expect(page).to have_content '-$19.99'
@@ -183,7 +185,7 @@ RSpec.feature 'Promotion for Store Credits', :js, :inaccessible do
       expect(Spree::Payment.last.amount.to_f).to be(Spree::Order.last.total.to_f)
       expect(Spree::Order.count).to be(2)
 
-      verify_store_credits '$9.00'
+      verify_store_credits '$2,463.12' # 2x promotion - 6 from used points
     end
 
     scenario 'allows even when admin is giving store credits' do
@@ -206,7 +208,7 @@ RSpec.feature 'Promotion for Store Credits', :js, :inaccessible do
 
       place_order!
 
-      verify_store_credits '$10.00'
+      verify_store_credits '$1,234.56' # points from promo plus 10 from admin minus 10 for order
       expect(Spree::Order.count).to be(1)
     end
   end

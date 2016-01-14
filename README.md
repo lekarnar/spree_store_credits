@@ -9,7 +9,9 @@ This Spree extension allows admins to issue arbitrary amounts of store credit to
 
 ## Installation
 
-Add spree_affiliate to your `Gemfile`:
+Please keep in mind only 3-0-stable branch is currently up to date and fully working. Also, one change has been made: Payment is always required and covering Order's total fully with Store Credits will always proceed to next (confirmation) page.
+
+Add `spree_store_credits` to your `Gemfile`:
 
 ```ruby
 gem 'spree_store_credits', github: 'spree-contrib/spree_store_credits', branch: 'master'

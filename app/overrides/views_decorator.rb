@@ -1,15 +1,28 @@
 Deface::Override.new(
-  virtual_path: 'spree/admin/shared/_configuration_menu',
+  virtual_path: 'spree/admin/shared/sub_menu/_configuration',
   name: 'store_credits_admin_configurations_menu',
   insert_bottom: '[data-hook="admin_configurations_sidebar_menu"]',
   text: '<%= configurations_sidebar_menu_item Spree.t(:store_credits), admin_store_credits_url %>',
-  disabled: false)
+  disabled: true
+)
+
+Deface::Override.new(
+  virtual_path: 'spree/admin/shared/_main_menu',
+  name: 'Add store credits to admin menu',
+  insert_after: %{erb[silent]:contains("if Spree.user_class && can?(:admin, Spree.user_class)")},
+  text: '<% if can?(:manage, Spree::StoreCredit) %>
+                           <ul class="nav nav-sidebar">
+                             <%= tab Spree.t(:store_credits), icon: "gift", url: admin_store_credits_path %>
+                             </ul>
+                           <% end %>',
+  disabled: false
+)
 
 Deface::Override.new(
   virtual_path: 'spree/admin/users/index',
   name: 'store_credits_admin_users_index_row_actions',
   insert_bottom: "[data-hook='admin_users_index_row_actions']",
-  text: "<%= link_to_with_icon('usd', Spree.t(:add_store_credit), new_admin_user_store_credit_url(user), {no_text: true}) %>",
+  text: "<%= link_to_with_icon('usd', Spree.t(:add_store_credit), new_admin_user_store_credit_url(user), {no_text: true, class: 'btn btn-primary btn-sm'}) %>",
   disabled: false)
 
 Deface::Override.new(
@@ -25,6 +38,14 @@ Deface::Override.new(
   insert_after: '[data-hook="account_my_orders"]',
   partial: 'spree/users/store_credits',
   disabled: false)
+
+
+Deface::Override.new(
+  virtual_path: 'spree/admin/users/_sidebar',
+  name: 'store_credits_admin_users',
+  insert_bottom: '[data-hook="admin_user_tab_options"]',
+  text: "<li<%== \" class='active'\" if current == :items %>><%= link_to_with_icon('usd', Spree.t(:store_credits), admin_user_store_credits_path(@user)) %></li>"
+)
 
 Deface::Override.new(
   virtual_path: 'spree/admin/general_settings/edit',

@@ -47,7 +47,7 @@ RSpec.describe Spree::Admin::StoreCreditsController, type: :controller do
     it 'creates a store credit for the user when arguments are provided' do
       expect {
         spree_post :create, store_credit: { amount: amount, reason: reason, user_id: user.id }
-        expect(response).to redirect_to(spree.admin_store_credits_path)
+        expect(response).to redirect_to(spree.admin_user_store_credits_path(user))
       }.to change(Spree::StoreCredit, :count).by(1)
       user.reload
       store_credit = user.store_credits.first
@@ -89,7 +89,7 @@ RSpec.describe Spree::Admin::StoreCreditsController, type: :controller do
       new_store_credit.reload
       expect(new_store_credit.reason).to eq(new_reason)
       expect(flash[:error]).to be_nil
-      expect(response).to redirect_to(spree.admin_store_credits_path)
+      expect(response).to redirect_to(spree. admin_user_store_credits_path(new_store_credit.user))
     end
 
     it 'redirects to spree.admin_store_credits_path for a used store credit' do

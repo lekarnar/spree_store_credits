@@ -10,6 +10,9 @@ module Spree
     end
 
     private
+    def location_after_save
+      admin_user_store_credits_url(@store_credit.user)
+    end
 
     def check_amounts
       return unless @store_credit.remaining_amount < @store_credit.amount
@@ -23,7 +26,7 @@ module Spree
 
     def collection
       # TODO: PMG - Figure out how we can integrate with accessible_by
-      Spree::StoreCredit.all.page(params[:page] || 1)
+      Spree::StoreCredit.user(params[:user_id]).page(params[:page] || 1)
     end
 
     def permitted_store_credit_attributes

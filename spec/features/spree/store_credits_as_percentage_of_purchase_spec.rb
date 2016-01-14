@@ -7,6 +7,7 @@ RSpec.feature 'Promotion for Store Credits as Percentage', :js, :inaccessible do
   given!(:mug)             { create(:product, name: 'RoR Mug') }
   given!(:payment_method)  { create(:credit_card_payment_method) }
   given!(:zone)            { create(:zone) }
+  given!(:store)           { create(:store) }
 
   context 'when new user' do
     given!(:address)   { create(:address, state: Spree::State.first) }

@@ -19,7 +19,7 @@ Spree::Order.class_eval do
   alias_method_chain :process_payments!, :credits
 
   def store_credit_amount
-    @store_credit_amount || adjustments.store_credits.sum(:amount).abs.to_f
+    adjustments.store_credits.sum(:amount).abs.to_f
   end
 
   # in case of paypal payment, item_total cannot be 0
@@ -30,6 +30,10 @@ Spree::Order.class_eval do
   # returns the maximum usable amount of store credits
   def store_credit_maximum_usable_amount
     [store_credit_maximum_amount, [user.store_credits_total, 0].max].min
+  end
+
+  def payment_required?
+    true
   end
 
   private
@@ -43,7 +47,7 @@ Spree::Order.class_eval do
     @store_credit_amount = BigDecimal.new(@store_credit_amount.to_s).round(2)
 
     # store credit can't be greater than order total (not including existing credit), or the user's available credit
-    @store_credit_amount = [@store_credit_amount, user.store_credits_total, (total + store_credit_amount.abs)].min
+    @store_credit_amount = [@store_credit_amount, user.store_credits_total, (total + adjustments.store_credits.sum(:amount).abs)].min
 
     if @store_credit_amount <= 0 || @remove_store_credits
       adjustments.store_credits.destroy_all
@@ -57,6 +61,7 @@ Spree::Order.class_eval do
           label: Spree.t(:store_credit),
           amount: -(@store_credit_amount),
           source_type: 'Spree::StoreCredit',
+          order: self,
           adjustable: self
         )
       end
@@ -69,13 +74,14 @@ Spree::Order.class_eval do
     unprocessed_payments.first.amount
   end
 
+
   def consume_users_credit
     return unless completed? && user.present?
     credit_used = store_credit_amount
 
     user.store_credits.each do |store_credit|
       break if credit_used == 0
-      break unless store_credit.remaining_amount > 0
+      next unless store_credit.remaining_amount > 0
       if store_credit.remaining_amount > credit_used
         store_credit.remaining_amount -= credit_used
         store_credit.save
